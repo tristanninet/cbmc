@@ -306,12 +306,11 @@ irep_idt get_string_argument(const exprt &src, const namespacet &ns)
   return get_string_argument_rec(tmp);
 }
 
-void goto_symext::symex_printf(
-  statet &state,
-  const exprt &rhs)
+void goto_symext::symex_printf(statet &state, const irept &rhs)
 {
   PRECONDITION(!rhs.operands().empty());
 
+#if 0
   exprt tmp_rhs=rhs;
   state.rename(tmp_rhs, ns);
   do_simplify(tmp_rhs);
@@ -329,6 +328,7 @@ void goto_symext::symex_printf(
     target.output_fmt(
       state.guard.as_expr(),
       state.source, "printf", format_string, args);
+#endif
 }
 
 void goto_symext::symex_input(
