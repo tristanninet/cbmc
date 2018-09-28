@@ -610,7 +610,7 @@ bool initialize_nondet_string_fields(
   if(struct_type.get_tag() == "java.lang.CharSequence")
   {
     set_class_identifier(
-      struct_expr, ns, symbol_typet("java::java.lang.String"));
+      struct_expr, ns, struct_tag_typet("java::java.lang.String"));
   }
 
   // OK, this is a String type with the expected fields -- add code to `code`
@@ -1040,7 +1040,7 @@ void java_object_factoryt::gen_nondet_struct_init(
         struct_type, source_locationt(), ns, nullout);
     irep_idt qualified_clsid = "java::" + id2string(class_identifier);
     set_class_identifier(
-      to_struct_expr(initial_object), ns, symbol_typet(qualified_clsid));
+      to_struct_expr(initial_object), ns, struct_tag_typet(qualified_clsid));
 
     // If the initialised type is a special-cased String type (one with length
     // and data fields introduced by string-library preprocessing), initialise
@@ -1211,9 +1211,9 @@ void java_object_factoryt::gen_nondet_init(
     if(is_sub)
     {
       const typet &symbol = override_ ? override_type : expr.type();
-      PRECONDITION(symbol.id() == ID_symbol_type);
+      PRECONDITION(symbol.id() == ID_struct_tag);
       generic_parameter_specialization_map_keys.insert_pairs_for_symbol(
-        to_symbol_type(symbol), struct_type);
+        to_struct_tag_type(symbol), struct_type);
     }
 
     gen_nondet_struct_init(
@@ -1345,7 +1345,7 @@ void java_object_factoryt::gen_nondet_array_init(
   const source_locationt &location)
 {
   PRECONDITION(expr.type().id()==ID_pointer);
-  PRECONDITION(expr.type().subtype().id() == ID_symbol_type);
+  PRECONDITION(expr.type().subtype().id() == ID_struct_tag);
   PRECONDITION(update_in_place!=update_in_placet::MAY_UPDATE_IN_PLACE);
 
   const typet &type=ns.follow(expr.type().subtype());
