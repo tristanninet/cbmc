@@ -185,6 +185,48 @@ const mp_integer binary2integer(const std::string &n, bool is_signed)
   #endif
 }
 
+/// conversion of '0'...'9' and 'a'/'A'...'f'/'F' to 0...15
+static unsigned char hexdigit2int(char digit)
+{
+  PRECONDITION(isxdigit(digit));
+  return isdigit(digit) ? digit - '0'
+                        : isupper(digit) ? digit - 'A' + 10 : digit - 'a' + 10;
+}
+
+/// convert hexadecimal string representation to mp_integer
+/// \par parameters: string of '0'-'1' and 'a'/'A'-'f'/'F',
+/// most significant nibble first
+/// Fails a precondition if any other characters are given.
+/// \return mp_integer
+const mp_integer hex2integer(const std::string &n)
+{
+  if(n.empty())
+    return 0;
+
+  if(n.size() <= (sizeof(unsigned long long) * 2))
+  {
+    // this is a tuned implementation for short integers
+
+    unsigned shift_distance = 0;
+    unsigned long long result = 0;
+
+    for(auto it = n.rbegin(); it != n.rend(); it++)
+    {
+      const auto digit = (unsigned long long)hexdigit2int(*it);
+      result |= digit << shift_distance;
+      shift_distance += 4; // 4 bits per nibble
+    }
+
+    return result;
+  }
+
+  for(const auto &ch : n)
+    if(!isxdigit(ch))
+      PRECONDITION(false);
+
+  return BigInt(n.c_str(), 16);
+}
+
 /// convert an integer to bit-vector representation with given width
 const std::string integer2bv(const mp_integer &src, std::size_t width)
 {
