@@ -102,6 +102,59 @@ const std::string integer2binary(const mp_integer &n, std::size_t width)
   return result;
 }
 
+static unsigned hexdigit2int(char digit)
+{
+  return isdigit(digit) ? digit-'0' : digit-'a'+10;
+}
+
+static char int2hexdigit(unsigned digit)
+{
+  return digit<10 ? digit+'0' : digit-10+'a';
+}
+
+/// \return string of '0'/'1', most significant nibble first
+const std::string integer2hex(const mp_integer &n, std::size_t width)
+{
+  mp_integer a(n);
+
+  if(width==0)
+    return "";
+
+  bool neg=a.is_negative();
+
+  if(neg)
+  {
+    a.negate();
+    a=a-1;
+  }
+
+  std::size_t len = a.digits(16) + 2;
+  std::vector<char> buffer(len);
+  char *s = a.as_string(buffer.data(), len, 16);
+
+  std::string result(s);
+
+  if(result.size()<width)
+  {
+    std::string fill;
+    fill.resize(width-result.size(), '0');
+    result=fill+result;
+  }
+  else if(result.size()>width)
+    result=result.substr(result.size()-width, width);
+
+  if(neg)
+  {
+    for(auto &ch : result)
+    {
+      unsigned digit=hexdigit2int(ch);
+      ch=int2hexdigit(15-digit);
+    }
+  }
+
+  return result;
+}
+
 const std::string integer2string(const mp_integer &n, unsigned base)
 {
   unsigned len = n.digits(base) + 2;
@@ -183,6 +236,55 @@ const mp_integer binary2integer(const std::string &n, bool is_signed)
     return BigInt(n.c_str(), 2);
 
   #endif
+}
+
+/// convert hexadecimal string representation to mp_integer
+/// \par parameters: string of '0'-'1' and 'a'-'f', most significant nibble first
+/// \return mp_integer
+const mp_integer hex2integer(const std::string &n, bool is_signed)
+{
+  if(n.empty())
+    return 0;
+
+  if(n.size()<=(sizeof(unsigned long)*8))
+  {
+    // this is a tuned implementation for short integers
+
+    unsigned long mask=1;
+    mask=mask << (n.size()-1);
+    mp_integer top_bit=(n[0]=='1') ? mask : 0;
+    if(is_signed)
+      top_bit.negate();
+    mask>>=1;
+    unsigned long other_bits=0;
+
+    for(std::string::const_iterator it=++n.begin();
+        it!=n.end();
+        ++it)
+    {
+      if(*it=='1')
+        other_bits+=mask;
+      else if(*it!='0')
+        return 0;
+
+      mask>>=1;
+    }
+
+    return top_bit+other_bits;
+  }
+
+  for(const auto &ch : n)
+    if(!isxdigit(ch))
+      return 0;
+
+  if(is_signed && n[0]=='1')
+  {
+    mp_integer result(n.c_str()+1, 2);
+    result-=mp_integer(1)<<(n.size()-1);
+    return result;
+  }
+  else
+    return BigInt(n.c_str(), 16);
 }
 
 /// convert an integer to bit-vector representation with given width
