@@ -88,17 +88,17 @@ static bool sum_expr(
   }
   else if(type_id==ID_unsignedbv || type_id==ID_signedbv)
   {
-    dest.set_value(integer2binary(
-      binary2integer(id2string(dest.get_value()), false)+
-      binary2integer(id2string(expr.get_value()), false),
+    dest.set_value(integer2bv(
+      bv2integer(id2string(dest.get_value()), false)+
+      bv2integer(id2string(expr.get_value()), false),
       to_bitvector_type(dest.type()).get_width()));
     return false;
   }
   else if(type_id==ID_fixedbv)
   {
-    dest.set_value(integer2binary(
-      binary2integer(id2string(dest.get_value()), false)+
-      binary2integer(id2string(expr.get_value()), false),
+    dest.set_value(integer2bv(
+      bv2integer(id2string(dest.get_value()), false)+
+      bv2integer(id2string(expr.get_value()), false),
       to_bitvector_type(dest.type()).get_width()));
     return false;
   }
@@ -143,9 +143,9 @@ static bool mul_expr(
   else if(type_id==ID_unsignedbv || type_id==ID_signedbv)
   {
     // the following works for signed and unsigned integers
-    dest.set_value(integer2binary(
-      binary2integer(id2string(dest.get_value()), false)*
-      binary2integer(id2string(expr.get_value()), false),
+    dest.set_value(integer2bv(
+      bv2integer(id2string(dest.get_value()), false)*
+      bv2integer(id2string(expr.get_value()), false),
       to_bitvector_type(dest.type()).get_width()));
     return false;
   }
@@ -831,7 +831,7 @@ bool simplify_exprt::simplify_bitwise(exprt &expr)
     }
     else if(expr.id()==ID_bitxor)
     {
-      constant_exprt new_op(integer2binary(0, width), expr.type());
+      constant_exprt new_op(integer2bv(0, width), expr.type());
       expr.swap(new_op);
       return false;
     }

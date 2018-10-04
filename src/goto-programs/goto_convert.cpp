@@ -1835,7 +1835,7 @@ bool goto_convertt::get_string_constant(
         if(it->is_constant())
         {
           unsigned long i=integer2ulong(
-            binary2integer(id2string(to_constant_expr(*it).get_value()), true));
+            bv2integer(id2string(to_constant_expr(*it).get_value()), true));
 
           if(i!=0) // to skip terminating 0
             result+=static_cast<char>(i);
