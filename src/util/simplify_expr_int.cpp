@@ -717,9 +717,6 @@ bool simplify_exprt::simplify_bitwise(exprt &expr)
 
   while(expr.operands().size()>=2)
   {
-    const irep_idt &a_str=expr.op0().get(ID_value);
-    const irep_idt &b_str=expr.op1().get(ID_value);
-
     if(!expr.op0().is_constant())
       break;
 
@@ -732,30 +729,21 @@ bool simplify_exprt::simplify_bitwise(exprt &expr)
     if(expr.op1().type()!=expr.type())
       break;
 
-    INVARIANT(
-      a_str.size() == b_str.size(),
-      "bitvectors of the same type have the same size");
+    const auto &a_val = to_constant_expr(expr.op0()).get_value();
+    const auto &b_val = to_constant_expr(expr.op1()).get_value();
 
-    std::string new_value;
-    new_value.resize(width);
+    std::function<bool(bool, bool)> f;
 
     if(expr.id()==ID_bitand)
-    {
-      for(std::size_t i=0; i<width; i++)
-        new_value[i]=(a_str[i]=='1' && b_str[i]=='1')?'1':'0';
-    }
+      f = [](bool a, bool b) { return a & b; };
     else if(expr.id()==ID_bitor)
-    {
-      for(std::size_t i=0; i<width; i++)
-        new_value[i]=(a_str[i]=='1' || b_str[i]=='1')?'1':'0';
-    }
+      f = [](bool a, bool b) { return a | b; };
     else if(expr.id()==ID_bitxor)
-    {
-      for(std::size_t i=0; i<width; i++)
-        new_value[i]=((a_str[i]=='1')!=(b_str[i]=='1'))?'1':'0';
-    }
+      f = [](bool a, bool b) { return a ^ b; };
     else
-      break;
+      UNREACHABLE;
+
+    const irep_idt new_value = bitvector_bitwise_op(a_val, b_val, f);
 
     constant_exprt new_op(new_value, expr.type());
 

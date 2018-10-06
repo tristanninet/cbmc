@@ -262,3 +262,26 @@ void mp_max(mp_integer &a, const mp_integer &b)
   if(b>a)
     a=b;
 }
+
+/// perform a binary bit-wise operation, given as a functor,
+/// on a bit-vector representation
+/// \param f: the functor
+irep_idt bitvector_bitwise_op(
+  const irep_idt &a,
+  const irep_idt &b,
+  const std::function<bool(bool, bool)> f)
+{
+  PRECONDITION(a.size() == b.size());
+
+  std::string result(' ', a.size());
+
+  for(std::size_t i = 0; i < result.size(); i++)
+  {
+    const bool bit_a = a[i] == '1';
+    const bool bit_b = b[i] == '1';
+    const bool bit_result = f(bit_a, bit_b);
+    result[i] = bit_result ? '1' : '0';
+  }
+
+  return result;
+}

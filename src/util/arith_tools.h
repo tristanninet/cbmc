@@ -164,4 +164,11 @@ mp_integer power(const mp_integer &base, const mp_integer &exponent);
 void mp_min(mp_integer &a, const mp_integer &b);
 void mp_max(mp_integer &a, const mp_integer &b);
 
+/// perform a binary bit-wise operation, given as a functor,
+/// on a bit-vector representation
+irep_idt bitvector_bitwise_op(
+  const irep_idt &,
+  const irep_idt &,
+  std::function<bool(bool, bool)>);
+
 #endif // CPROVER_UTIL_ARITH_TOOLS_H
