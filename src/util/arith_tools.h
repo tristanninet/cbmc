@@ -172,7 +172,7 @@ bool get_bitvector_bit(
 irep_idt
 make_bvrep(const std::size_t width, const std::function<bool(std::size_t)> f);
 
-const std::string integer2bv(const mp_integer &, std::size_t width);
-const mp_integer bv2integer(const std::string &, bool is_signed);
+irep_idt integer2bv(const mp_integer &, std::size_t width);
+mp_integer bv2integer(const irep_idt &, bool is_signed);
 
 #endif // CPROVER_UTIL_ARITH_TOOLS_H

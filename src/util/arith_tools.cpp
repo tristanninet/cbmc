@@ -43,17 +43,17 @@ bool to_integer(const constant_exprt &expr, mp_integer &int_value)
   }
   else if(type_id==ID_unsignedbv)
   {
-    int_value = bv2integer(id2string(value), false);
+    int_value = bv2integer(value, false);
     return false;
   }
   else if(type_id==ID_signedbv)
   {
-    int_value = bv2integer(id2string(value), true);
+    int_value = bv2integer(value, true);
     return false;
   }
   else if(type_id==ID_c_bool)
   {
-    int_value = bv2integer(id2string(value), false);
+    int_value = bv2integer(value, false);
     return false;
   }
   else if(type_id==ID_c_enum)
@@ -61,12 +61,12 @@ bool to_integer(const constant_exprt &expr, mp_integer &int_value)
     const typet &subtype=to_c_enum_type(type).subtype();
     if(subtype.id()==ID_signedbv)
     {
-      int_value = bv2integer(id2string(value), true);
+      int_value = bv2integer(value, true);
       return false;
     }
     else if(subtype.id()==ID_unsignedbv)
     {
-      int_value = bv2integer(id2string(value), false);
+      int_value = bv2integer(value, false);
       return false;
     }
   }
@@ -75,12 +75,12 @@ bool to_integer(const constant_exprt &expr, mp_integer &int_value)
     const typet &subtype = to_c_bit_field_type(type).subtype();
     if(subtype.id()==ID_signedbv)
     {
-      int_value = bv2integer(id2string(value), true);
+      int_value = bv2integer(value, true);
       return false;
     }
     else if(subtype.id()==ID_unsignedbv)
     {
-      int_value = bv2integer(id2string(value), false);
+      int_value = bv2integer(value, false);
       return false;
     }
   }
@@ -329,13 +329,13 @@ irep_idt bitvector_bitwise_op(
 }
 
 /// convert an integer to bit-vector representation with given width
-const std::string integer2bv(const mp_integer &src, std::size_t width)
+irep_idt integer2bv(const mp_integer &src, std::size_t width)
 {
   return integer2binary(src, width);
 }
 
 /// convert a bit-vector representation (possibly signed) to integer
-const mp_integer bv2integer(const std::string &src, bool is_signed)
+mp_integer bv2integer(const irep_idt &src, bool is_signed)
 {
-  return binary2integer(src, is_signed);
+  return binary2integer(id2string(src), is_signed);
 }
