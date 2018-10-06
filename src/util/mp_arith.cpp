@@ -186,17 +186,53 @@ const mp_integer binary2integer(const std::string &n, bool is_signed)
 }
 
 /// convert an integer to bit-vector representation with given width
+/// This uses two's complement for negative numbers.
+/// If the value is out of range, it is 'wrapped around'.
 const std::string integer2bv(const mp_integer &src, std::size_t width)
 {
-  return integer2binary(src, width);
+  const mp_integer p = power(2, width);
+
+  if(src.is_negative())
+  {
+    // do two's complement encoding of negative numbers
+    mp_integer tmp = src;
+    tmp.negate();
+    tmp %= p;
+    if(tmp != 0)
+      tmp = p - tmp;
+    return integer2string(tmp, 16);
+  }
+  else
+  {
+    // we 'wrap around' if 'src' is too large
+    return integer2string(src % p, 16);
+  }
 }
 
 /// convert a bit-vector representation (possibly signed) to integer
 const mp_integer
 bv2integer(const std::string &src, std::size_t width, bool is_signed)
 {
-  PRECONDITION(src.size() == width);
-  return binary2integer(src, is_signed);
+  if(is_signed)
+  {
+    PRECONDITION(width >= 1);
+    const auto tmp = string2integer(src, 16);
+    const auto p = power(2, width - 1);
+    if(tmp >= p)
+    {
+      const auto result = tmp - 2 * p;
+      PRECONDITION(result >= -p);
+      return result;
+    }
+    else
+      return tmp;
+  }
+  else
+  {
+    const auto result = string2integer(src, 16);
+    PRECONDITION(result < power(2, width));
+    return result;
+  }
 }
 
 mp_integer::ullong_t integer2ulong(const mp_integer &n)
