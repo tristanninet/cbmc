@@ -788,8 +788,8 @@ bool simplify_exprt::simplify_bitwise(exprt &expr)
         ) // no it++
     {
       if(it->is_constant() &&
-         id2string(to_constant_expr(*it).get_value()).find('0')==
-           std::string::npos &&
+         bv2integer(id2string(to_constant_expr(*it).get_value()), width, false)==
+           power(2, width)-1 &&
          expr.operands().size()>1)
       {
         it=expr.operands().erase(it);
