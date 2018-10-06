@@ -10,6 +10,7 @@ Author: Daniel Kroening, kroening@kroening.com
 /// \file
 /// Expression Representation
 
+#include "arith_tools.h"
 #include "expr.h"
 #include "expr_iterator.h"
 #include "fixedbv.h"
