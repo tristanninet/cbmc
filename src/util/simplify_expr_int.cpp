@@ -1269,9 +1269,11 @@ bool simplify_exprt::simplify_bitnot(exprt &expr)
 
   exprt &op=operands.front();
 
-  if(expr.type().id()==ID_bv ||
-     expr.type().id()==ID_unsignedbv ||
-     expr.type().id()==ID_signedbv)
+  const auto &type = expr.type();
+
+  if(
+    type.id() == ID_bv || type.id() == ID_unsignedbv ||
+    type.id() == ID_signedbv)
   {
     const auto width = to_bitvector_type(expr.type()).get_width();
 
