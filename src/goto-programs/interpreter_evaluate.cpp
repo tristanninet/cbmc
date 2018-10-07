@@ -382,7 +382,7 @@ void interpretert::evaluate(
     else if(expr.type().id()==ID_c_bool)
     {
       const irep_idt &value=to_constant_expr(expr).get_value();
-      dest.push_back(bv2integer(value, false));
+      dest.push_back(bvrep2integer(value, false));
       return;
     }
     else if(expr.type().id()==ID_bool)
@@ -984,15 +984,15 @@ void interpretert::evaluate(
       else if(expr.type().id()==ID_signedbv)
       {
         const auto s =
-          integer2bv(value, to_signedbv_type(expr.type()).get_width());
-        dest.push_back(bv2integer(s, true));
+          integer2bvrep(value, to_signedbv_type(expr.type()).get_width());
+        dest.push_back(bvrep2integer(s, true));
         return;
       }
       else if(expr.type().id()==ID_unsignedbv)
       {
         const auto s =
-          integer2bv(value, to_unsignedbv_type(expr.type()).get_width());
-        dest.push_back(bv2integer(s, false));
+          integer2bvrep(value, to_unsignedbv_type(expr.type()).get_width());
+        dest.push_back(bvrep2integer(s, false));
         return;
       }
       else if((expr.type().id()==ID_bool) || (expr.type().id()==ID_c_bool))
