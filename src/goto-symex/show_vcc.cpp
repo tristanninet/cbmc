@@ -64,7 +64,7 @@ void show_vcc_plain(
         if(!p_it->ignore)
         {
           std::string string_value =
-            from_expr(ns, p_it->source.pc->function, p_it->cond_expr);
+            from_expr(ns, p_it->source.function, p_it->cond_expr);
           out << "{-" << count << "} " << string_value << "\n";
 
 #if 0
@@ -95,7 +95,7 @@ void show_vcc_plain(
     for(const auto &disjunct : disjuncts)
     {
       std::string string_value =
-        from_expr(ns, s_it->source.pc->function, disjunct);
+        from_expr(ns, s_it->source.function, disjunct);
       out << "{" << count << "} " << string_value << "\n";
       count++;
     }
@@ -148,13 +148,13 @@ void show_vcc_json(
         !p_it->ignore)
       {
         std::string string_value =
-          from_expr(ns, p_it->source.pc->function, p_it->cond_expr);
+          from_expr(ns, p_it->source.function, p_it->cond_expr);
         json_constraints.push_back(json_stringt(string_value));
       }
     }
 
     std::string string_value =
-      from_expr(ns, s_it->source.pc->function, s_it->cond_expr);
+      from_expr(ns, s_it->source.function, s_it->cond_expr);
     object["expression"] = json_stringt(string_value);
   }
 

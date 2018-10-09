@@ -260,7 +260,7 @@ void goto_symext::symex_instruction_range(
 {
   initialize_entry_point(state, get_goto_function, first, limit);
   ns = namespacet(outer_symbol_table, state.symbol_table);
-  while(state.source.pc->function!=limit->function || state.source.pc!=limit)
+  while(state.source.function != limit->function || state.source.pc != limit)
     symex_threaded_step(state, get_goto_function);
 }
 
