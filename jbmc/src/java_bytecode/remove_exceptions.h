@@ -32,6 +32,7 @@ enum class remove_exceptions_typest
 };
 
 void remove_exceptions(
+  const irep_idt &function_identifier,
   goto_programt &goto_program,
   symbol_table_baset &symbol_table,
   message_handlert &message_handler,
