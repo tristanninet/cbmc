@@ -34,7 +34,9 @@ class constant_propagator_domaint:public ai_domain_baset
 {
 public:
   virtual void transform(
+    const irep_idt &function_from,
     locationt from,
+    const irep_idt &function_to,
     locationt to,
     ai_baset &ai_base,
     const namespacet &ns) final override;
@@ -193,17 +195,6 @@ public:
     const namespacet ns(goto_model.symbol_table);
     operator()(goto_model.goto_functions, ns);
     replace(goto_model.goto_functions, ns);
-  }
-
-  constant_propagator_ait(
-    goto_functionst::goto_functiont &goto_function,
-    const namespacet &ns,
-    should_track_valuet should_track_value = track_all_values):
-    dirty(goto_function),
-    should_track_value(should_track_value)
-  {
-    operator()(goto_function, ns);
-    replace(goto_function, ns);
   }
 
   dirtyt dirty;
