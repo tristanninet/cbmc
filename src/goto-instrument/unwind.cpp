@@ -77,6 +77,7 @@ void goto_unwindt::copy_segment(
 }
 
 void goto_unwindt::unwind(
+  const irep_idt &function_identifier,
   goto_programt &goto_program,
   const goto_programt::const_targett loop_head,
   const goto_programt::const_targett loop_exit,
@@ -84,11 +85,12 @@ void goto_unwindt::unwind(
   const unwind_strategyt unwind_strategy)
 {
   std::vector<goto_programt::targett> iteration_points;
-  unwind(goto_program, loop_head, loop_exit, k, unwind_strategy,
+  unwind(function_identifier, goto_program, loop_head, loop_exit, k, unwind_strategy,
          iteration_points);
 }
 
 void goto_unwindt::unwind(
+  const irep_idt &function_identifier,
   goto_programt &goto_program,
   const goto_programt::const_targett loop_head,
   const goto_programt::const_targett loop_exit,
@@ -257,6 +259,7 @@ void goto_unwindt::unwind(
 }
 
 void goto_unwindt::unwind(
+  const irep_idt &function_identifier,
   goto_programt &goto_program,
   const unwindsett &unwindset,
   const unwind_strategyt unwind_strategy)
@@ -277,7 +280,7 @@ void goto_unwindt::unwind(
       continue;
     }
 
-    const irep_idt func=i_it->function;
+    const irep_idt func=function_identifier;
     assert(!func.empty());
 
     const irep_idt loop_id=
@@ -297,7 +300,7 @@ void goto_unwindt::unwind(
     loop_exit++;
     assert(loop_exit!=goto_program.instructions.end());
 
-    unwind(goto_program, loop_head, loop_exit, *limit, unwind_strategy);
+    unwind(function_identifier, goto_program, loop_head, loop_exit, *limit, unwind_strategy);
 
     // necessary as we change the goto program in the previous line
     i_it=loop_exit;
@@ -322,7 +325,7 @@ void goto_unwindt::operator()(
 
     goto_programt &goto_program=goto_function.body;
 
-    unwind(goto_program, unwindset, unwind_strategy);
+    unwind(it->first, goto_program, unwindset, unwind_strategy);
   }
 }
 
