@@ -35,15 +35,15 @@ void ai_baset::output(
       out << "////\n";
       out << "\n";
 
-      output(ns, f_it->second.body, f_it->first, out);
+      output(ns, f_it->first, f_it->second.body, out);
     }
   }
 }
 
 void ai_baset::output(
   const namespacet &ns,
+  const irep_idt &function_identifier,
   const goto_programt &goto_program,
-  const irep_idt &identifier,
   std::ostream &out) const
 {
   forall_goto_program_instructions(i_it, goto_program)
@@ -54,7 +54,7 @@ void ai_baset::output(
     abstract_state_before(i_it)->output(out, *this, ns);
     out << "\n";
     #if 1
-    goto_program.output_instruction(ns, identifier, out, *i_it);
+    goto_program.output_instruction(ns, function_identifier, out, *i_it);
     out << "\n";
     #endif
   }
@@ -74,7 +74,7 @@ jsont ai_baset::output_json(
     if(f_it->second.body_available())
     {
       result[id2string(f_it->first)]=
-        output_json(ns, f_it->second.body, f_it->first);
+        output_json(ns, f_it->first, f_it->second.body);
     }
     else
     {
@@ -90,8 +90,8 @@ jsont ai_baset::output_json(
 /// \return The JSON object
 jsont ai_baset::output_json(
   const namespacet &ns,
-  const goto_programt &goto_program,
-  const irep_idt &identifier) const
+  const irep_idt &function,
+  const goto_programt &goto_program) const
 {
   json_arrayt contents;
 
@@ -107,7 +107,7 @@ jsont ai_baset::output_json(
 
     // Ideally we need output_instruction_json
     std::ostringstream out;
-    goto_program.output_instruction(ns, identifier, out, *i_it);
+    goto_program.output_instruction(ns, function, out, *i_it);
     location["instruction"]=json_stringt(out.str());
 
     contents.push_back(location);
@@ -135,7 +135,7 @@ xmlt ai_baset::output_xml(
 
     if(f_it->second.body_available())
     {
-      function.new_element(output_xml(ns, f_it->second.body, f_it->first));
+      function.new_element(output_xml(ns, f_it->first, f_it->second.body));
     }
 
     program.new_element(function);
@@ -149,8 +149,8 @@ xmlt ai_baset::output_xml(
 /// \return The XML object
 xmlt ai_baset::output_xml(
   const namespacet &ns,
-  const goto_programt &goto_program,
-  const irep_idt &identifier) const
+  const irep_idt &function,
+  const goto_programt &goto_program) const
 {
   xmlt function_body;
 
@@ -168,7 +168,7 @@ xmlt ai_baset::output_xml(
 
     // Ideally we need output_instruction_xml
     std::ostringstream out;
-    goto_program.output_instruction(ns, identifier, out, *i_it);
+    goto_program.output_instruction(ns, function, out, *i_it);
     location.set_attribute("instruction", out.str());
 
     function_body.new_element(location);
