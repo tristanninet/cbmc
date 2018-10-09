@@ -33,23 +33,29 @@ public:
   }
 
   // Lower java_new for a single function
-  bool lower_java_new(goto_programt &);
+  bool lower_java_new(
+    const irep_idt &function_identifier,
+    goto_programt &);
 
   // Lower java_new for a single instruction
   goto_programt::targett
-  lower_java_new(goto_programt &, goto_programt::targett);
+  lower_java_new(
+    const irep_idt &function_identifier,
+    goto_programt &, goto_programt::targett);
 
 protected:
   symbol_table_baset &symbol_table;
   namespacet ns;
 
   goto_programt::targett lower_java_new(
+    const irep_idt &function_identifier,
     exprt lhs,
     side_effect_exprt rhs,
     goto_programt &,
     goto_programt::targett);
 
   goto_programt::targett lower_java_new_array(
+    const irep_idt &function_identifier,
     exprt lhs,
     side_effect_exprt rhs,
     goto_programt &,
@@ -68,6 +74,7 @@ protected:
 /// Note: we have to take a copy of `lhs` and `rhs` since they would suffer
 ///   destruction when replacing the instruction.
 goto_programt::targett remove_java_newt::lower_java_new(
+  const irep_idt &function_identifier,
   exprt lhs,
   side_effect_exprt rhs,
   goto_programt &dest,
@@ -116,6 +123,7 @@ goto_programt::targett remove_java_newt::lower_java_new(
 /// Note: we have to take a copy of `lhs` and `rhs` since they would suffer
 ///   destruction when replacing the instruction.
 goto_programt::targett remove_java_newt::lower_java_new_array(
+  const irep_idt &function_identifier,
   exprt lhs,
   side_effect_exprt rhs,
   goto_programt &dest,
@@ -206,7 +214,7 @@ goto_programt::targett remove_java_newt::lower_java_new_array(
   // `x=typecast_exprt(side_effect_exprt(...))`
   symbol_exprt new_array_data_symbol = get_fresh_aux_symbol(
                                          data_java_new_expr.type(),
-                                         id2string(target->function),
+                                         id2string(function_identifier),
                                          "tmp_new_data_array",
                                          location,
                                          ID_java,
@@ -253,7 +261,7 @@ goto_programt::targett remove_java_newt::lower_java_new_array(
 
     symbol_exprt tmp_i = get_fresh_aux_symbol(
                            length.type(),
-                           id2string(target->function),
+                           id2string(function_identifier),
                            "tmp_index",
                            location,
                            ID_java,
@@ -287,7 +295,7 @@ goto_programt::targett remove_java_newt::lower_java_new_array(
     code_blockt for_body;
     symbol_exprt init_sym = get_fresh_aux_symbol(
                               sub_type,
-                              id2string(target->function),
+                              id2string(function_identifier),
                               "subarray_init",
                               location,
                               ID_java,
@@ -311,7 +319,7 @@ goto_programt::targett remove_java_newt::lower_java_new_array(
     goto_convert(for_loop, symbol_table, tmp, get_message_handler(), ID_java);
 
     // lower new side effects recursively
-    lower_java_new(tmp);
+    lower_java_new(function_identifier, tmp);
 
     dest.destructive_insert(next, tmp);
   }
@@ -325,6 +333,7 @@ goto_programt::targett remove_java_newt::lower_java_new_array(
 /// \param target: instruction to check for java_new expressions
 /// \return true if a replacement has been made
 goto_programt::targett remove_java_newt::lower_java_new(
+  const irep_idt &function_identifier,
   goto_programt &goto_program,
   goto_programt::targett target)
 {
@@ -338,13 +347,13 @@ goto_programt::targett remove_java_newt::lower_java_new(
 
   if(rhs.id() == ID_side_effect && rhs.get(ID_statement) == ID_java_new)
   {
-    return lower_java_new(lhs, to_side_effect_expr(rhs), goto_program, target);
+    return lower_java_new(function_identifier, lhs, to_side_effect_expr(rhs), goto_program, target);
   }
 
   if(rhs.id() == ID_side_effect && rhs.get(ID_statement) == ID_java_new_array)
   {
     return lower_java_new_array(
-      lhs, to_side_effect_expr(rhs), goto_program, target);
+      function_identifier, lhs, to_side_effect_expr(rhs), goto_program, target);
   }
 
   return target;
@@ -355,7 +364,9 @@ goto_programt::targett remove_java_newt::lower_java_new(
 /// Extra auxiliary variables may be introduced into symbol_table.
 /// \param goto_program: The function body to work on.
 /// \return true if one or more java_new expressions have been replaced
-bool remove_java_newt::lower_java_new(goto_programt &goto_program)
+bool remove_java_newt::lower_java_new(
+  const irep_idt &function_identifier,
+  goto_programt &goto_program)
 {
   bool changed = false;
   for(goto_programt::instructionst::iterator target =
@@ -363,7 +374,7 @@ bool remove_java_newt::lower_java_new(goto_programt &goto_program)
       target != goto_program.instructions.end();
       ++target)
   {
-    goto_programt::targett new_target = lower_java_new(goto_program, target);
+    goto_programt::targett new_target = lower_java_new(function_identifier, goto_program, target);
     changed = changed || new_target == target;
     target = new_target;
   }
@@ -381,13 +392,14 @@ bool remove_java_newt::lower_java_new(goto_programt &goto_program)
 /// \param symbol_table: The symbol table to add symbols to.
 /// \param message_handler: a message handler
 void remove_java_new(
+  const irep_idt &function_identifier,
   goto_programt::targett target,
   goto_programt &goto_program,
   symbol_table_baset &symbol_table,
   message_handlert &message_handler)
 {
   remove_java_newt rem(symbol_table, message_handler);
-  rem.lower_java_new(goto_program, target);
+  rem.lower_java_new(function_identifier, goto_program, target);
 }
 
 /// Replace every java_new or java_new_array by a malloc side-effect
@@ -397,12 +409,13 @@ void remove_java_new(
 /// \param symbol_table: The symbol table to add symbols to.
 /// \param message_handler: a message handler
 void remove_java_new(
+  const irep_idt &function_identifier,
   goto_functionst::goto_functiont &function,
   symbol_table_baset &symbol_table,
   message_handlert &message_handler)
 {
   remove_java_newt rem(symbol_table, message_handler);
-  rem.lower_java_new(function.body);
+  rem.lower_java_new(function_identifier, function.body);
 }
 
 /// Replace every java_new or java_new_array by a malloc side-effect
@@ -419,7 +432,7 @@ void remove_java_new(
   remove_java_newt rem(symbol_table, message_handler);
   bool changed = false;
   for(auto &f : goto_functions.function_map)
-    changed = rem.lower_java_new(f.second.body) || changed;
+    changed = rem.lower_java_new(f.first, f.second.body) || changed;
   if(changed)
     goto_functions.compute_location_numbers();
 }
