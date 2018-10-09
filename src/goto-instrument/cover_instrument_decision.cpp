@@ -16,6 +16,7 @@ Author: Daniel Kroening
 #include "cover_util.h"
 
 void cover_decision_instrumentert::instrument(
+  const irep_idt &function,
   goto_programt &goto_program,
   goto_programt::targett &i_it,
   const cover_blocks_baset &) const
@@ -32,10 +33,9 @@ void cover_decision_instrumentert::instrument(
 
     for(const auto &d : decisions)
     {
-      const std::string d_string = from_expr(ns, i_it->function, d);
+      const std::string d_string = from_expr(ns, function, d);
 
       const std::string comment_t = "decision `" + d_string + "' true";
-      const irep_idt function = i_it->function;
       goto_program.insert_before_swap(i_it);
       i_it->make_assertion(d);
       i_it->source_location = source_location;

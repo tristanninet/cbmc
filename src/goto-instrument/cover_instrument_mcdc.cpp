@@ -621,6 +621,7 @@ void minimize_mcdc_controlling(
 }
 
 void cover_mcdc_instrumentert::instrument(
+  const irep_idt &function,
   goto_programt &goto_program,
   goto_programt::targett &i_it,
   const cover_blocks_baset &) const
@@ -657,10 +658,9 @@ void cover_mcdc_instrumentert::instrument(
                                   ? "decision/condition"
                                   : is_decision ? "decision" : "condition";
 
-      std::string p_string = from_expr(ns, i_it->function, p);
+      std::string p_string = from_expr(ns, function, p);
 
       std::string comment_t = description + " `" + p_string + "' true";
-      const irep_idt function = i_it->function;
       goto_program.insert_before_swap(i_it);
       i_it->make_assertion(not_exprt(p));
       i_it->source_location = source_location;
@@ -693,12 +693,11 @@ void cover_mcdc_instrumentert::instrument(
 
     for(const auto &p : controlling)
     {
-      std::string p_string = from_expr(ns, i_it->function, p);
+      std::string p_string = from_expr(ns, function, p);
 
       std::string description =
         "MC/DC independence condition `" + p_string + "'";
 
-      const irep_idt function = i_it->function;
       goto_program.insert_before_swap(i_it);
       i_it->make_assertion(not_exprt(p));
       i_it->source_location = source_location;

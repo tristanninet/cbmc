@@ -40,12 +40,13 @@ public:
   /// \param goto_program: a goto program
   /// \param basic_blocks: detected basic blocks
   virtual void operator()(
+    const irep_idt &function,
     goto_programt &goto_program,
     const cover_blocks_baset &basic_blocks) const
   {
     Forall_goto_program_instructions(i_it, goto_program)
     {
-      instrument(goto_program, i_it, basic_blocks);
+      instrument(function, goto_program, i_it, basic_blocks);
     }
   }
 
@@ -58,6 +59,7 @@ protected:
 
   /// Override this method to implement an instrumenter
   virtual void instrument(
+    const irep_idt &function,
     goto_programt &,
     goto_programt::targett &,
     const cover_blocks_baset &) const = 0;
@@ -94,11 +96,12 @@ public:
   /// \param goto_program: a goto program
   /// \param basic_blocks: detected basic blocks of the goto program
   void operator()(
+    const irep_idt &function,
     goto_programt &goto_program,
     const cover_blocks_baset &basic_blocks) const
   {
     for(const auto &instrumenter : instrumenters)
-      (*instrumenter)(goto_program, basic_blocks);
+      (*instrumenter)(function, goto_program, basic_blocks);
   }
 
 private:
@@ -118,6 +121,7 @@ public:
 
 protected:
   void instrument(
+    const irep_idt &function,
     goto_programt &,
     goto_programt::targett &,
     const cover_blocks_baset &) const override;
@@ -136,6 +140,7 @@ public:
 
 protected:
   void instrument(
+    const irep_idt &function,
     goto_programt &,
     goto_programt::targett &,
     const cover_blocks_baset &) const override;
@@ -154,6 +159,7 @@ public:
 
 protected:
   void instrument(
+    const irep_idt &function,
     goto_programt &,
     goto_programt::targett &,
     const cover_blocks_baset &) const override;
@@ -172,6 +178,7 @@ public:
 
 protected:
   void instrument(
+    const irep_idt &function,
     goto_programt &,
     goto_programt::targett &,
     const cover_blocks_baset &) const override;
@@ -190,6 +197,7 @@ public:
 
 protected:
   void instrument(
+    const irep_idt &function,
     goto_programt &,
     goto_programt::targett &,
     const cover_blocks_baset &) const override;
@@ -208,6 +216,7 @@ public:
 
 protected:
   void instrument(
+    const irep_idt &function,
     goto_programt &,
     goto_programt::targett &,
     const cover_blocks_baset &) const override;
@@ -226,6 +235,7 @@ public:
 
 protected:
   void instrument(
+    const irep_idt &function,
     goto_programt &,
     goto_programt::targett &,
     const cover_blocks_baset &) const override;
@@ -244,6 +254,7 @@ public:
 
 protected:
   void instrument(
+    const irep_idt &function,
     goto_programt &,
     goto_programt::targett &,
     const cover_blocks_baset &) const override;

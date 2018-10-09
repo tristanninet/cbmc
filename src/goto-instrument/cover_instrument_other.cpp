@@ -16,6 +16,7 @@ Author: Daniel Kroening
 #include "cover_util.h"
 
 void cover_path_instrumentert::instrument(
+  const irep_idt &,
   goto_programt &,
   goto_programt::targett &i_it,
   const cover_blocks_baset &) const
@@ -27,6 +28,7 @@ void cover_path_instrumentert::instrument(
 }
 
 void cover_assertion_instrumentert::instrument(
+  const irep_idt &function,
   goto_programt &,
   goto_programt::targett &i_it,
   const cover_blocks_baset &) const
@@ -36,11 +38,12 @@ void cover_assertion_instrumentert::instrument(
   {
     i_it->guard = false_exprt();
     initialize_source_location(
-      i_it, id2string(i_it->source_location.get_comment()), i_it->function);
+      i_it, id2string(i_it->source_location.get_comment()), function);
   }
 }
 
 void cover_cover_instrumentert::instrument(
+  const irep_idt &function,
   goto_programt &,
   goto_programt::targett &i_it,
   const cover_blocks_baset &) const
@@ -58,11 +61,11 @@ void cover_cover_instrumentert::instrument(
     {
       const exprt c = code_function_call.arguments()[0];
       std::string comment =
-        "condition `" + from_expr(ns, i_it->function, c) + "'";
+        "condition `" + from_expr(ns, function, c) + "'";
       i_it->guard = not_exprt(c);
       i_it->type = ASSERT;
       i_it->code.clear();
-      initialize_source_location(i_it, comment, i_it->function);
+      initialize_source_location(i_it, comment, function);
     }
   }
   else if(is_non_cover_assertion(i_it))

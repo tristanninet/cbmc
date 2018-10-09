@@ -31,6 +31,7 @@ Date: May 2016
 ///        ID_java)
 /// \param message_handler: a message handler
 void instrument_cover_goals(
+  const irep_idt &function,
   goto_programt &goto_program,
   const cover_instrumenterst &instrumenters,
   const irep_idt &mode,
@@ -42,8 +43,8 @@ void instrument_cover_goals(
                     : std::unique_ptr<cover_blocks_baset>(
                         new cover_basic_blockst(goto_program));
 
-  basic_blocks->report_block_anomalies(goto_program, message_handler);
-  instrumenters(goto_program, *basic_blocks);
+  basic_blocks->report_block_anomalies(function, goto_program, message_handler);
+  instrumenters(function, goto_program, *basic_blocks);
 }
 
 /// Instruments goto program for a given coverage criterion
@@ -60,6 +61,7 @@ DEPRECATED(
   "message_handlert &message_handler, const irep_idt mode) instead")
 void instrument_cover_goals(
   const symbol_tablet &symbol_table,
+  const irep_idt &function,
   goto_programt &goto_program,
   coverage_criteriont criterion,
   message_handlert &message_handler)
@@ -71,7 +73,7 @@ void instrument_cover_goals(
   instrumenters.add_from_criterion(criterion, symbol_table, goal_filters);
 
   instrument_cover_goals(
-    goto_program, instrumenters, ID_unknown, message_handler);
+    function, goto_program, instrumenters, ID_unknown, message_handler);
 }
 
 /// Create and add an instrumenter based on the given criterion
@@ -283,7 +285,7 @@ static void instrument_cover_goals(
   if(config.function_filters(function_id, function))
   {
     instrument_cover_goals(
-      function.body, config.cover_instrumenters, config.mode, message_handler);
+      function_id, function.body, config.cover_instrumenters, config.mode, message_handler);
     changed = true;
   }
 

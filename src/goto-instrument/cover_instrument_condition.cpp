@@ -17,6 +17,7 @@ Author: Daniel Kroening
 #include "cover_basic_blocks.h"
 
 void cover_condition_instrumentert::instrument(
+  const irep_idt &function,
   goto_programt &goto_program,
   goto_programt::targett &i_it,
   const cover_blocks_baset &) const
@@ -33,10 +34,9 @@ void cover_condition_instrumentert::instrument(
 
     for(const auto &c : conditions)
     {
-      const std::string c_string = from_expr(ns, i_it->function, c);
+      const std::string c_string = from_expr(ns, function, c);
 
       const std::string comment_t = "condition `" + c_string + "' true";
-      const irep_idt function = i_it->function;
       goto_program.insert_before_swap(i_it);
       i_it->make_assertion(c);
       i_it->source_location = source_location;
