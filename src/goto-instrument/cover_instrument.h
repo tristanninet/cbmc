@@ -73,7 +73,6 @@ protected:
     t->source_location.set(ID_coverage_criterion, coverage_criterion);
     t->source_location.set_property_class(property_class);
     t->source_location.set_function(function);
-    t->function = function;
   }
 
   bool is_non_cover_assertion(goto_programt::const_targett t) const

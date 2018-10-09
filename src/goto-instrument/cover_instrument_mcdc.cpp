@@ -668,7 +668,6 @@ void cover_mcdc_instrumentert::instrument(
       i_it->source_location.set(ID_coverage_criterion, coverage_criterion);
       i_it->source_location.set_property_class(property_class);
       i_it->source_location.set_function(function);
-      i_it->function = function;
 
       std::string comment_f = description + " `" + p_string + "' false";
       goto_program.insert_before_swap(i_it);
@@ -678,7 +677,6 @@ void cover_mcdc_instrumentert::instrument(
       i_it->source_location.set(ID_coverage_criterion, coverage_criterion);
       i_it->source_location.set_property_class(property_class);
       i_it->source_location.set_function(function);
-      i_it->function = function;
     }
 
     std::set<exprt> controlling;
@@ -705,7 +703,6 @@ void cover_mcdc_instrumentert::instrument(
       i_it->source_location.set(ID_coverage_criterion, coverage_criterion);
       i_it->source_location.set_property_class(property_class);
       i_it->source_location.set_function(function);
-      i_it->function = function;
     }
 
     for(std::size_t i = 0; i < both.size() * 2 + controlling.size(); i++)

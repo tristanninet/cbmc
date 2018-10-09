@@ -40,7 +40,11 @@ void goto_symext::symex_transition(
       if(i_e->is_goto() && i_e->is_backwards_goto() &&
          (!is_backwards_goto ||
           state.source.pc->location_number>i_e->location_number))
-        frame.loop_iterations[goto_programt::loop_id(*i_e)].count=0;
+      {
+        const auto loop_id =
+          goto_programt::loop_id(state.source.function, *i_e);
+        frame.loop_iterations[loop_id].count = 0;
+      }
   }
 
   state.source.pc=to;

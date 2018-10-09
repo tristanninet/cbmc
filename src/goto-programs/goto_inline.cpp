@@ -244,14 +244,12 @@ void goto_function_inline(
   const irep_idt function,
   const namespacet &ns,
   message_handlert &message_handler,
-  bool adjust_function,
   bool caching)
 {
   goto_inlinet goto_inline(
     goto_functions,
     ns,
     message_handler,
-    adjust_function,
     caching);
 
   goto_functionst::function_mapt::iterator f_it=

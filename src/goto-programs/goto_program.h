@@ -178,9 +178,6 @@ public:
   public:
     codet code;
 
-    /// The function this instruction belongs to
-    irep_idt function;
-
     /// The location of the instruction in the source file
     source_locationt source_location;
 
@@ -347,7 +344,6 @@ public:
       swap(instruction.type, type);
       swap(instruction.guard, guard);
       swap(instruction.targets, targets);
-      swap(instruction.function, function);
     }
 
     #if (defined _MSC_VER && _MSC_VER <= 1800)
@@ -422,42 +418,6 @@ public:
   const_targett const_cast_target(const_targett t) const
   {
     return t;
-  }
-
-  /// Get the id of the function that contains the instruction pointed-to by the
-  /// given instruction iterator.
-  ///
-  /// \param l: instruction iterator
-  /// \return id of the function that contains the pointed-to goto instruction
-  static const irep_idt get_function_id(
-    const_targett l)
-  {
-    // The field `function` of an instruction may not always contain the id of
-    // the function it is currently in, due to goto program modifications such
-    // as inlining. For example, if an instruction in a function `f` is inlined
-    // into a function `g`, the instruction may, depending on the arguments to
-    // the inliner, retain the original value of `f` in the function field.
-    // However, instructions of type END_FUNCTION are never inlined into other
-    // functions, hence they contain the id of the function they are in. Thus,
-    // this function takes the END_FUNCTION instruction of the goto program and
-    // returns the value of its function field.
-
-    while(!l->is_end_function())
-      ++l;
-
-    return l->function;
-  }
-
-  /// Get the id of the function that contains the given goto program.
-  ///
-  /// \param p: the goto program
-  /// \return id of the function that contains the goto program
-  static const irep_idt get_function_id(
-    const goto_programt &p)
-  {
-    PRECONDITION(!p.empty());
-
-    return get_function_id(--p.instructions.end());
   }
 
   template <typename Target>
@@ -578,22 +538,6 @@ public:
     }
   }
 
-  /// Sets the `function` member of each instruction if not yet set
-  /// Note that a goto program need not be a goto function and therefore,
-  /// we cannot do this in update(), but only at the level of
-  /// of goto_functionst where goto programs are guaranteed to be
-  /// named functions.
-  void update_instructions_function(const irep_idt &function_id)
-  {
-    for(auto &instruction : instructions)
-    {
-      if(instruction.function.empty())
-      {
-        instruction.function = function_id;
-      }
-    }
-  }
-
   /// Compute location numbers
   void compute_location_numbers()
   {
@@ -608,9 +552,10 @@ public:
   void update();
 
   /// Human-readable loop name
-  static irep_idt loop_id(const instructiont &instruction)
+  static irep_idt
+  loop_id(const irep_idt &function_id, const instructiont &instruction)
   {
-    return id2string(instruction.function)+"."+
+    return id2string(function_id) + "." +
            std::to_string(instruction.loop_number);
   }
 
