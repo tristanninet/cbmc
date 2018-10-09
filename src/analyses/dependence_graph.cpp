@@ -53,6 +53,7 @@ bool dep_graph_domaint::merge(
 }
 
 void dep_graph_domaint::control_dependencies(
+  const irep_idt &function_identifier,
   goto_programt::const_targett from,
   goto_programt::const_targett to,
   dependence_grapht &dep_graph)
@@ -83,7 +84,7 @@ void dep_graph_domaint::control_dependencies(
 
   // Get postdominators
 
-  const irep_idt id=from->function;
+  const irep_idt id=function_identifier;
   const cfg_post_dominatorst &pd=dep_graph.cfg_post_dominators().at(id);
 
   // Check all candidates
@@ -206,7 +207,7 @@ void dep_graph_domaint::transform(
   {
     if(function_from == function_to)
     {
-      control_dependencies(from, to, *dep_graph);
+      control_dependencies(function_from, from, to, *dep_graph);
     }
     else
     {
@@ -232,7 +233,7 @@ void dep_graph_domaint::transform(
     }
   }
   else
-    control_dependencies(from, to, *dep_graph);
+    control_dependencies(function_from, from, to, *dep_graph);
 
   data_dependencies(from, to, *dep_graph, ns);
 }

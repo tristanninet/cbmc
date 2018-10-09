@@ -203,6 +203,7 @@ private:
     dependence_graph_test_get_data_deps(const dep_graph_domaint &);
 
   void control_dependencies(
+    const irep_idt &function_identifier,
     goto_programt::const_targett from,
     goto_programt::const_targett to,
     dependence_grapht &dep_graph);
@@ -234,18 +235,6 @@ public:
   {
     ait<dep_graph_domaint>::initialize(goto_functions);
     rd(goto_functions, ns);
-  }
-
-  void initialize(const goto_programt &goto_program)
-  {
-    ait<dep_graph_domaint>::initialize(goto_program);
-
-    if(!goto_program.empty())
-    {
-      const irep_idt id=goto_programt::get_function_id(goto_program);
-      cfg_post_dominatorst &pd=post_dominators[id];
-      pd(goto_program);
-    }
   }
 
   void finalize()
