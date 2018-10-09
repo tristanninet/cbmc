@@ -41,21 +41,25 @@ public:
 
   using baset::output;
 
-  virtual void output(locationt l, std::ostream &out)
+  void
+  output(const irep_idt &function_identifier, locationt l, std::ostream &out)
   {
-    state.value_set.set_from(l->function, l->location_number);
-    state.value_set.set_to(l->function, l->location_number);
+    state.value_set.set_from(function_identifier, l->location_number);
+    state.value_set.set_to(function_identifier, l->location_number);
     state.output(ns, out);
   }
 
-  void output(const goto_programt &goto_program, std::ostream &out)
+  void output(
+    const irep_idt &function_identifier,
+    const goto_programt &goto_program,
+    std::ostream &out)
   {
     forall_goto_program_instructions(it, goto_program)
     {
       out << "**** " << it->source_location << '\n';
-      output(it, out);
+      output(function_identifier, it, out);
       out << '\n';
-      goto_program.output_instruction(ns, "", out, *it);
+      goto_program.output_instruction(ns, function_identifier, out, *it);
       out << '\n';
     }
   }
@@ -81,14 +85,15 @@ protected:
 public:
   // interface value_sets
   virtual void get_values(
+    const irep_idt &function_identifier,
     locationt l,
     const exprt &expr,
     std::list<exprt> &dest)
   {
     state.value_set.from_function =
-      state.value_set.function_numbering.number(l->function);
+      state.value_set.function_numbering.number(function_identifier);
     state.value_set.to_function =
-      state.value_set.function_numbering.number(l->function);
+      state.value_set.function_numbering.number(function_identifier);
     state.value_set.from_target_index = l->location_number;
     state.value_set.to_target_index = l->location_number;
     state.value_set.get_value_set(expr, dest, ns);

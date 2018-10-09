@@ -50,6 +50,7 @@ public:
   void pointer_checks(goto_functionst &goto_functions);
 
   void dereference_expression(
+    const irep_idt &function,
     goto_programt::const_targett target,
     exprt &expr);
 
@@ -92,6 +93,7 @@ protected:
   const std::set<irep_idt> *valid_local_variables;
 #endif
   source_locationt dereference_location;
+  irep_idt current_function;
   goto_programt::const_targett current_target;
 
   std::set<exprt> assertions;
