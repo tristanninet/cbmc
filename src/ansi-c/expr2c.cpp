@@ -3021,7 +3021,15 @@ std::string expr2ct::convert_code_assign(
   const code_assignt &src,
   unsigned indent)
 {
-  std::string tmp=convert_binary(src, "=", 2, true);
+  if(src.operands().size()!=2)
+  {
+    unsigned precedence;
+    return convert_norep(src, precedence);
+  }
+
+  binary_exprt tmp_binary(src.op0(), ID_assign, src.op1());
+
+  std::string tmp=convert_binary(tmp_binary, "=", 2, true);
 
   std::string dest=indent_str(indent)+tmp+";";
 
