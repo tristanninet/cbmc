@@ -65,38 +65,27 @@ static void build_dead_map_from_ai(
 
 static void output_dead_plain(
   const namespacet &ns,
+  const irep_idt &function_identifier,
   const goto_programt &goto_program,
   const dead_mapt &dead_map,
   std::ostream &os)
 {
-  assert(!goto_program.instructions.empty());
-  goto_programt::const_targett end_function=
-    goto_program.instructions.end();
-  --end_function;
-  assert(end_function->is_end_function());
-
-  os << "\n*** " << end_function->function << " ***\n";
+  os << "\n*** " << function_identifier << " ***\n";
 
   for(dead_mapt::const_iterator it=dead_map.begin();
       it!=dead_map.end();
       ++it)
-    goto_program.output_instruction(ns, "", os, *it->second);
+    goto_program.output_instruction(ns, function_identifier, os, *it->second);
 }
 
 static void add_to_xml(
+  const irep_idt &function_identifier,
   const goto_programt &goto_program,
   const dead_mapt &dead_map,
   xmlt &dest)
 {
-  PRECONDITION(!goto_program.instructions.empty());
-  goto_programt::const_targett end_function=
-    goto_program.instructions.end();
-  --end_function;
-  DATA_INVARIANT(end_function->is_end_function(),
-                 "The last instruction in a goto-program must be END_FUNCTION");
-
   xmlt &x = dest.new_element("function");
-  x.set_attribute("name", id2string(end_function->function));
+  x.set_attribute("name", id2string(function_identifier));
 
   for(dead_mapt::const_iterator it=dead_map.begin();
       it!=dead_map.end();
@@ -113,12 +102,11 @@ static void add_to_xml(
 
 static void add_to_json(
   const namespacet &ns,
+  const irep_idt &function_identifier,
   const goto_programt &goto_program,
   const dead_mapt &dead_map,
   json_arrayt &dest)
 {
-  json_objectt &entry=dest.push_back().make_object();
-
   PRECONDITION(!goto_program.instructions.empty());
   goto_programt::const_targett end_function=
     goto_program.instructions.end();
@@ -126,7 +114,9 @@ static void add_to_json(
   DATA_INVARIANT(end_function->is_end_function(),
                  "The last instruction in a goto-program must be END_FUNCTION");
 
-  entry["function"] = json_stringt(end_function->function);
+  json_objectt &entry = dest.push_back().make_object();
+
+  entry["function"] = json_stringt(function_identifier);
   entry["fileName"]=
     json_stringt(concat_dir_file(
         id2string(end_function->source_location.get_working_directory()),
@@ -191,9 +181,9 @@ void unreachable_instructions(
     if(!dead_map.empty())
     {
       if(!json)
-        output_dead_plain(ns, goto_program, dead_map, os);
+        output_dead_plain(ns, f_it->first, goto_program, dead_map, os);
       else
-        add_to_json(ns, goto_program, dead_map, json_result);
+        add_to_json(ns, f_it->first, goto_program, dead_map, json_result);
     }
   }
 
@@ -225,16 +215,16 @@ bool static_unreachable_instructions(
     {
       if(options.get_bool_option("json"))
       {
-        add_to_json(ns, f_it->second.body, dead_map, json_result);
+        add_to_json(ns, f_it->first, f_it->second.body, dead_map, json_result);
       }
       else if(options.get_bool_option("xml"))
       {
-        add_to_xml(f_it->second.body, dead_map, xml_result);
+        add_to_xml(f_it->first, f_it->second.body, dead_map, xml_result);
       }
       else
       {
         // text or console
-        output_dead_plain(ns, f_it->second.body, dead_map, out);
+        output_dead_plain(ns, f_it->first, f_it->second.body, dead_map, out);
       }
     }
   }
