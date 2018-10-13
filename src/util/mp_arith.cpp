@@ -185,11 +185,47 @@ const mp_integer binary2integer(const std::string &n, bool is_signed)
   #endif
 }
 
+//#define B256
+
+#ifdef B256
+std::string dump_integer(mp_integer src)
+{
+  std::size_t d = src.digits(256) + 1;
+  unsigned char *buf = new unsigned char[d], *p = buf;
+  src.dump(buf, d);
+  while(d > 0 && *p == 0)
+  {
+    d--;
+    p++;
+  }
+  return std::string((char *)p, d);
+}
+#endif
+
 /// convert an integer to bit-vector representation with given width
 /// This uses two's complement for negative numbers.
 /// If the value is out of range, it is 'wrapped around'.
 const std::string integer2bv(const mp_integer &src, std::size_t width)
 {
+#ifdef B256
+  const mp_integer p = power(2, width);
+
+  if(src.is_negative())
+  {
+    // do two's complement encoding of negative numbers
+    mp_integer tmp = src;
+    tmp.negate();
+    tmp %= p;
+    if(tmp != 0)
+      tmp = p - tmp;
+    return dump_integer(tmp);
+  }
+  else
+  {
+    // we 'wrap around' if 'src' is too large
+    return dump_integer(src % p);
+  }
+#else
   const mp_integer p = power(2, width);
 
   if(src.is_negative())
@@ -207,12 +243,37 @@ const std::string integer2bv(const mp_integer &src, std::size_t width)
     // we 'wrap around' if 'src' is too large
     return integer2string(src % p, 16);
   }
+#endif
 }
 
 /// convert a bit-vector representation (possibly signed) to integer
 const mp_integer
 bv2integer(const std::string &src, std::size_t width, bool is_signed)
 {
+#ifdef B256
+  if(is_signed)
+  {
+    PRECONDITION(width >= 1);
+    mp_integer tmp;
+    tmp.load((const unsigned char *)src.data(), src.size());
+    const auto p = power(2, width - 1);
+    if(tmp >= p)
+    {
+      const auto result = tmp - 2 * p;
+      PRECONDITION(result >= -p);
+      return result;
+    }
+    else
+      return tmp;
+  }
+  else
+  {
+    mp_integer result;
+    result.load((const unsigned char *)src.data(), src.size());
+    PRECONDITION(result < power(2, width));
+    return result;
+  }
+#else
   if(is_signed)
   {
     PRECONDITION(width >= 1);
@@ -233,6 +294,7 @@ bv2integer(const std::string &src, std::size_t width, bool is_signed)
     PRECONDITION(result < power(2, width));
     return result;
   }
+#endif
 }
 
 mp_integer::ullong_t integer2ulong(const mp_integer &n)

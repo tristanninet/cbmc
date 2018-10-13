@@ -165,6 +165,8 @@ bool exprt::is_boolean() const
   return type().id()==ID_bool;
 }
 
+//#define B256
+
 /// Return whether the expression is a constant representing 0.
 /// Will consider the following types: ID_integer, ID_natural, ID_rational,
 /// ID_unsignedbv, ID_signedbv, ID_c_bool, ID_c_bit_field, ID_fixedbv,
@@ -195,7 +197,11 @@ bool exprt::is_zero() const
       type_id == ID_unsignedbv || type_id == ID_signedbv ||
       type_id == ID_c_bool || type_id == ID_c_bit_field)
     {
+#ifdef B256
+      return constant.get_value().empty();
+#else
       return constant.value_is_zero_string();
+#endif
     }
     else if(type_id==ID_fixedbv)
     {

@@ -278,6 +278,8 @@ void mp_max(mp_integer &a, const mp_integer &b)
     a=b;
 }
 
+//#define B256
+
 /// Get a bit with given index from bit-vector representation.
 /// \param src: the bitvector representation
 /// \param width: the number of bits in the bitvector
@@ -289,6 +291,16 @@ bool get_bitvector_bit(
 {
   PRECONDITION(bit_index < width);
 
+#ifdef B256
+  const auto byte_index = bit_index >> 3;
+
+  if(byte_index >= src.size())
+    return false;
+
+  unsigned char byte = src[src.size() - 1 - byte_index];
+
+  return ((byte >> (bit_index & 7)) & 1) != 0;
+#else
   // The representation is hex, most significant nibble first.
   const auto nibble_index = bit_index >> 2;
 
@@ -304,8 +316,10 @@ bool get_bitvector_bit(
                     : islower(nibble) ? nibble - 'a' + 10 : nibble - 'A' + 10;
 
   return ((nibble_value >> (bit_index & 3)) & 1) != 0;
+#endif
 }
 
+#ifndef B256
 static char nibble2hex(unsigned nibble)
 {
   PRECONDITION(nibble <= 0xf);
@@ -315,6 +329,7 @@ static char nibble2hex(unsigned nibble)
   else
     return '0' + nibble;
 }
+#endif
 
 /// construct a bit-vector representation from a functor
 /// \param width: the width of the bit-vector
@@ -323,6 +338,35 @@ static char nibble2hex(unsigned nibble)
 irep_idt
 make_bvrep(const std::size_t width, const std::function<bool(std::size_t)> f)
 {
+#ifdef B256
+  std::string result;
+  result.reserve(width / 8 + 1);
+  unsigned byte = 0;
+
+  for(std::size_t i = 0; i < width; i++)
+  {
+    const auto bit_in_byte = i % 8;
+
+    byte |= ((unsigned)f(i)) << bit_in_byte;
+
+    if(bit_in_byte == 7)
+    {
+      result += (char)byte;
+      byte = 0;
+    }
+  }
+
+  if(byte != 0)
+    result += (char)byte;
+
+  // drop leading zeros
+  while(!result.empty() && result.back() == 0)
+    result.resize(result.size() - 1);
+
+  std::reverse(result.begin(), result.end());
+
+  return result;
+#else
   std::string result;
   result.reserve(width / 4 + 1);
   unsigned nibble = 0;
@@ -353,6 +397,7 @@ make_bvrep(const std::size_t width, const std::function<bool(std::size_t)> f)
     return ID_0;
   else
     return result;
+#endif
 }
 
 /// perform a binary bit-wise operation, given as a functor,
