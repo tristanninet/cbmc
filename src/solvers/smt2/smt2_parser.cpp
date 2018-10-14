@@ -1089,6 +1089,53 @@ typet smt2_parsert::function_signature_declaration()
   return mathematical_function_typet(domain, codomain);
 }
 
+/// process a datatype declaration (a Z3 extension)
+void smt2_parsert::datatype_declaration()
+{
+  if(next_token() != OPEN)
+  {
+    error() << "expected '(' after declare-datatypes" << eom;
+    ignore_command();
+    return;
+  }
+
+  while(peek() != CLOSE)
+  {
+    if(next_token() != SYMBOL)
+    {
+      error() << "expected symbol in datatype declaration" << eom;
+      return;
+    }
+  }
+
+  next_token(); // eat the ')'
+
+  if(next_token() != OPEN)
+  {
+    error() << "expected '(' as second argument in datatype declaration" << eom;
+    ignore_command();
+    return;
+  }
+
+  while(peek() != CLOSE)
+  {
+    if(next_token() != OPEN)
+    {
+      error() << "expected '(' in datatype declaration" << eom;
+      ignore_command();
+      return;
+    }
+  }
+
+  next_token(); // eat the ')'
+
+  if(next_token() != CLOSE)
+  {
+    error() << "expected ')' at the end of datatype declaration" << eom;
+    return;
+  }
+}
+
 void smt2_parsert::command(const std::string &c)
 {
   if(c=="declare-const")
@@ -1112,6 +1159,10 @@ void smt2_parsert::command(const std::string &c)
     auto &entry=id_map[id];
     entry.type=sort();
     entry.definition=nil_exprt();
+  }
+  else if(c == "declare-datatypes")
+  {
+    datatype_declaration();
   }
   else if(c=="declare-fun")
   {

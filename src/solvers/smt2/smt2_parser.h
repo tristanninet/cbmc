@@ -58,6 +58,7 @@ protected:
   irep_idt rename_id(const irep_idt &) const;
 
   void ignore_command();
+  void datatype_declaration();
   exprt expression();
   exprt function_application();
   typet sort();
