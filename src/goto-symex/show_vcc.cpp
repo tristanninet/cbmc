@@ -16,10 +16,8 @@ Author: Daniel Kroening, kroening@kroening.com
 
 #include <goto-symex/symex_target_equation.h>
 
-#include <langapi/language_util.h>
-#include <langapi/mode.h>
-
 #include <util/exception_utils.h>
+#include <util/format_expr.h>
 #include <util/json.h>
 #include <util/json_expr.h>
 #include <util/ui_message.h>
@@ -63,13 +61,10 @@ void show_vcc_plain(
       {
         if(!p_it->ignore)
         {
-          std::string string_value =
-            from_expr(ns, p_it->source.pc->function, p_it->cond_expr);
-          out << "{-" << count << "} " << string_value << "\n";
+          out << "{-" << count << "} " << format(p_it->cond_expr) << "\n";
 
 #if 0
-          languages.from_expr(p_it->guard_expr, string_value);
-          out << "GUARD: " << string_value << "\n";
+          out << "GUARD: " << format(p_it->guard_expr) << "\n";
           out << "\n";
 #endif
 
@@ -83,9 +78,7 @@ void show_vcc_plain(
       out << u8"\u2500";
     out << '\n';
 
-    std::string string_value =
-      from_expr(ns, s_it->source.pc->function, s_it->cond_expr);
-    out << "{" << 1 << "} " << string_value << "\n";
+    out << "{" << 1 << "} " << format(s_it->cond_expr) << "\n";
   }
 }
 
@@ -134,15 +127,15 @@ void show_vcc_json(
         (p_it->is_assume() || p_it->is_assignment() || p_it->is_constraint()) &&
         !p_it->ignore)
       {
-        std::string string_value =
-          from_expr(ns, p_it->source.pc->function, p_it->cond_expr);
-        json_constraints.push_back(json_stringt(string_value));
+        std::ostringstream stream;
+        stream << format(p_it->cond_expr);
+        json_constraints.push_back(json_stringt(stream.str()));
       }
     }
 
-    std::string string_value =
-      from_expr(ns, s_it->source.pc->function, s_it->cond_expr);
-    object["expression"] = json_stringt(string_value);
+    std::ostringstream stream;
+    stream << format(s_it->cond_expr);
+    object["expression"] = json_stringt(stream.str());
   }
 
   out << ",\n" << json_result;
