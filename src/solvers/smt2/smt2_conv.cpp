@@ -72,6 +72,7 @@ void smt2_convt::write_header()
   {
   case solvert::GENERIC: break;
   case solvert::BOOLECTOR: out << "; Generated for Boolector\n"; break;
+  case solvert::CPROVER_SMT2: out << "; Generated for the CPROVER SMT2 solver\n"; break;
   case solvert::CVC3: out << "; Generated for CVC 3\n"; break;
   case solvert::CVC4: out << "; Generated for CVC 4\n"; break;
   case solvert::MATHSAT: out << "; Generated for MathSAT\n"; break;
