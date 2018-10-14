@@ -41,7 +41,7 @@ bool to_integer(const constant_exprt &expr, mp_integer &int_value)
     int_value=string2integer(id2string(value));
     return false;
   }
-  else if(type_id==ID_unsignedbv)
+  else if(type_id == ID_unsignedbv || type_id == ID_bv)
   {
     int_value = bv2integer(id2string(value), false);
     return false;
