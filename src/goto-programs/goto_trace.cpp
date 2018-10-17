@@ -278,7 +278,37 @@ void show_state_header(
   else
     out << "State " << step_nr;
 
-  out << " " << source_location << " thread " << state.thread_nr << "\n";
+  if(!source_location.get_file().empty())
+  {
+    out << ' ';
+    out << source_location.get_file();
+  }
+
+  if(!source_location.get_line().empty())
+  {
+    out << ' ';
+    out << source_location.get_line();
+  }
+
+  if(!source_location.get_function().empty())
+  {
+    out << ' ';
+
+    const symbolt *function_symbol;
+    if(ns.lookup(source_location.get_function(), function_symbol))
+      out << function_symbol->display_name();
+    else
+      out << source_location.get_function();
+  }
+
+  if(!source_location.get_java_bytecode_index().empty())
+  {
+    out << ' ';
+    out << source_location.get_java_bytecode_index();
+  }
+
+  out << " thread " << state.thread_nr << "\n";
+
   out << "----------------------------------------------------"
       << "\n";
 
